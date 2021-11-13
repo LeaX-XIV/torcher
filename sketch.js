@@ -89,7 +89,8 @@ function mousePressed() {
 
 function mouseDragged() {
   if(holding) {
-    holding.move(mouseX, mouseY);
+    // TODO: Only works correctly if the browser is at 100% zoom
+    holding.move(movedX, movedY);
   }
 }
 

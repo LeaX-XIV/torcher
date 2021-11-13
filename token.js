@@ -65,9 +65,9 @@ class Token {
 		circle(this.x, this.y, this.size);
 	}
 
-	move(x, y) {
-		this.x = x;
-		this.y = y;
+	move(dx, dy) {
+		this.x += dx;
+		this.y += dy;
 	}
 
 	intersect(x, y) {
