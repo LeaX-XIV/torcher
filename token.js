@@ -8,15 +8,29 @@ class Token {
 	static TERRAIN = map_bg;
 	static WALLS = map_walls;
 
+	static get defaultValues() {
+		return {
+			x: 400,
+			y: 270,
+			size: 5,
+			color: '#0F53BA',
+			light: new Light(22.5, 22.5),
+			darkVision: false,
+			trueSight: false,
+			// Left out to prevent huge memory allocation if not needed
+			//vision: new Vision(-1, -1, createGraphics(feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET), feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET)))
+		}
+	}
+
 	// size, light have values expressed in feet
 	constructor(x, y, size, color, light, darkVision, trueSight, vision) {
-		this.x = x || 400;
-		this.y = y || 270;
-		this.size = feet2Pixel(size, Token.PIXEL_PER_FEET) || feet2Pixel(5, Token.PIXEL_PER_FEET);
-		this.color = color || '#0F53BA';
-		this.light = light || new Light(22.5, 22.5);
-		this.darkVision = darkVision || false;
-		this.trueSight = trueSight || false;
+		this.x = x || Token.defaultValues.x;
+		this.y = y || Token.defaultValues.y;
+		this.size = feet2Pixel(size || Token.defaultValues.size, Token.PIXEL_PER_FEET);
+		this.color = color || Token.defaultValues.color;
+		this.light = light || new Light(Token.defaultValues.light.bright, Token.defaultValues.light.dim);
+		this.darkVision = darkVision || Token.defaultValues.darkVision;
+		this.trueSight = trueSight || Token.defaultValues.trueSight;
 		this.vision = vision || new Vision(-1, -1, createGraphics(feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET), feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET)));
 	}
 
@@ -50,7 +64,6 @@ class Token {
 			dimSight.mask(Token.DIM_MASK);
 			dimSight.filter(GRAY)
 		}
-		// imageMode(CENTER)
 		image(dimSight, this.x, this.y);
 		if(!this.darkVision) {
 			image(brightSight, this.x, this.y);
