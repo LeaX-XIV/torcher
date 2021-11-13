@@ -48,15 +48,17 @@ class Token {
 	}
 
 	showTerrain(trueSight) {
-		blendMode(LIGHTEST);
 		imageMode(CENTER);
 		if(this.trueSight && trueSight) {
+			blendMode(LIGHTEST);
 			image(this.vision.vision, this.x, this.y, this.vision.vision.width, this.vision.vision.height);
+			blendMode(BLEND);
 			return;
 		} else if(this.trueSight && !trueSight) {
 			return;
 		}
 
+		blendMode(LIGHTEST);
 		let brightSight = undefined;
 		let dimSight = this.#obtainTerrainViewByCut(feet2Pixel(this.light.dimRadius, Token.PIXEL_PER_FEET));
 		if(!this.darkVision) {
