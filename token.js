@@ -103,7 +103,7 @@ class Token {
 		Token.WALLS.loadPixels();
 		for(let t = 0; t <= TWO_PI; t += (TWO_PI / Token.RAYTRACE_POINTS)) {
 			let found = false;
-			for(let r = 0; r <= 1; r += 0.01) {
+			for(let r = 0; r <= 1; r += 0.001) {
 				let [relX, relY] = toCartesian(r * radius, t);
 				let index = toIndexInPixelArray(int(relX + this.x), int(relY + this.y));
 				let red = Token.WALLS.pixels[index];
@@ -134,7 +134,6 @@ class Token {
 		let rayMask = createImage(gr.width, gr.height);
 		rayMask.copy(gr, 0, 0, gr.width, gr.height, 0, 0, gr.width, gr.height);
 		rayImg.mask(rayMask);
-
 
 		return rayImg;
 	}

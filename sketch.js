@@ -48,7 +48,7 @@ function setup() {
   createCanvas(W, H);
   background(BACKGROUND_COLOR);
   // rayG = createGraphics(RADIUS * 2, RADIUS * 2);
-  frameRate(15)
+  frameRate(30)
 
   tokens.push(new Token())
   tokens.push(new Token(500, 500, 5, '#ab572d', new Light(60, 60), false, true))
@@ -62,9 +62,9 @@ function draw() {
 
   showDarkness();
 
-  showWalls();
-
   showTerrainsTrueSight();
+
+  showWalls();
 
   showTokens();
 
@@ -128,8 +128,10 @@ function showGrid() {
   stroke(121);
   strokeWeight(1);
   for(let i = 0; i < W; i += PIXEL_PER_SQUARE) {
-    line(0, i, H, i);
-    line(i, 0, i, W);
+    line(i, 0, i, H);
+  }
+  for(let i = 0; i < H; i += PIXEL_PER_SQUARE) {
+    line(0, i, W, i);
   }
 }
 
