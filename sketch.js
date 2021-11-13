@@ -10,7 +10,7 @@ let map_walls;
 let W = 420;
 let H = 380;
 
-const BACKGROUD_COLOR = 0;
+const BACKGROUND_COLOR = 0;
 
 const PIXEL_PER_SQUARE = 42;  // Px/Sq
 const FEET_PER_SQUARE = 5;  // Ft/Sq
@@ -46,7 +46,7 @@ function preload() {
 
 function setup() {
   createCanvas(W, H);
-  background(BACKGROUD_COLOR);
+  background(BACKGROUND_COLOR);
   // rayG = createGraphics(RADIUS * 2, RADIUS * 2);
   frameRate(15)
 
@@ -56,7 +56,7 @@ function setup() {
 
 function draw() {
   clear();
-  background(BACKGROUD_COLOR);
+  background(BACKGROUND_COLOR);
 
   showTerrains();
 
