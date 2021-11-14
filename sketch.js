@@ -1,7 +1,8 @@
-const MAP_NAME = "map.jpg";
-const DIM_MASK_NAME = "dim_mask.svg";
-const CIRCLE_MASK_NAME = "circle_mask.svg";
-const MAP_WALLS_NAME = "map_walls.png";
+const SETTINGS_FILENAME = "./settings.json";
+
+const CIRCLE_MASK_NAME = "./circle_mask.svg";
+const DIM_MASK_NAME = "./dim_mask.svg";
+
 let map_bg;
 let dim_mask;
 let circle_mask;
@@ -10,41 +11,56 @@ let map_walls;
 let W = 420;
 let H = 380;
 
-const BACKGROUND_COLOR = 0;
+let backgroundColor = 0;
 
-const PIXEL_PER_SQUARE = 42;  // Px/Sq
+let grid_dx = 0;
+let grid_dy = 0;
+let grid_w = -1;
+let grid_h = -1;
+let pixelPerSquare = 1;  // Px/Sq
+
 const FEET_PER_SQUARE = 5;  // Ft/Sq
-// const SIGHT = 120; // Ft
-// const RADIUS = PIXEL_PER_SQUARE * SIGHT / FEET_PER_SQUARE; // Px/Sq * Ft / Ft/Sq = Px 
 
 let tokens = [];
 let holding = undefined;
 
 function preload() {
-  loadImage(MAP_NAME, img => {
-    map_bg = img
-    W = img.width;
-    H = img.height;
-    resizeCanvas(W, H);
-    Token.TERRAIN = map_bg
+  loadJSON(SETTINGS_FILENAME, settings => {
+    loadImage(settings['map'], img => {
+      map_bg = img;
+      W = img.width;
+      H = img.height;
+      resizeCanvas(W, H);
+      Token.TERRAIN = map_bg;
+    });
+    loadImage(settings['map_walls'], img => {
+      map_walls = img;
+      Token.WALLS = map_walls;
+    });
+
+    grid_dx = settings['grid_dy'];
+    grid_dy = settings['grid_dx'];
+    grid_w = settings['grid_w'];
+    grid_h = settings['grid_h'];
+    pixelPerSquare = settings['grid_step'];
+    Token.PIXEL_PER_FEET = pixelPerSquare / FEET_PER_SQUARE;
+
+    backgroundColor = settings['background_color'];
+  });
+
+  loadImage(CIRCLE_MASK_NAME, img => {
+    circle_mask = img;
+    Token.CIRCLE_MASK = circle_mask;
   });
   loadImage(DIM_MASK_NAME, img => {
     dim_mask = img;
     Token.DIM_MASK = dim_mask;
   });
-  loadImage(CIRCLE_MASK_NAME, img => {
-    circle_mask = img;
-    Token.CIRCLE_MASK = circle_mask;
-  });
-  loadImage(MAP_WALLS_NAME, img => {
-    map_walls = img;
-    Token.WALLS = map_walls;
-  });
 }
 
 function setup() {
   createCanvas(W, H);
-  background(BACKGROUND_COLOR);
+  background(backgroundColor);
   frameRate(30)
 
   tokens.push(new Token())
@@ -53,7 +69,7 @@ function setup() {
 
 function draw() {
   clear();
-  background(BACKGROUND_COLOR);
+  background(backgroundColor);
 
   showTerrains();
 
@@ -120,14 +136,21 @@ function showTokens() {
 }
 
 function showGrid() {
+  let limitH = grid_h === -1 ? H : (grid_h + grid_dx);
+  let limitW = grid_w === -1 ? W : (grid_w + grid_dy);
+
   stroke(121);
   strokeWeight(1);
-  for(let i = 0; i < W; i += PIXEL_PER_SQUARE) {
-    line(i, 0, i, H);
+  // Horizontal lines
+  for(let i = grid_dy; i < limitW; i += pixelPerSquare) {
+    line(i, grid_dx, i, limitH);
   }
-  for(let i = 0; i < H; i += PIXEL_PER_SQUARE) {
-    line(0, i, W, i);
+  line(limitW, grid_dx, limitW, limitH);
+  // Vertical lines
+  for(let i = grid_dx; i < limitH; i += pixelPerSquare) {
+    line(grid_dy, i, limitW, i);
   }
+  line(grid_dy, limitH, limitW, limitH);
 }
 
 function showWalls() {
