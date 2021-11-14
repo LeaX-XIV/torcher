@@ -28,7 +28,7 @@ class Token {
 		y = Token.defaultValues.y,
 		size = Token.defaultValues.size,
 		color = Token.defaultValues.color,
-		light = new Light(Token.defaultValues.light.bright, Token.defaultValues.light.dim),
+		light = new Light(Token.defaultValues.light.bright, Token.defaultValues.light.dim, Token.defaultValues.size / 2),
 		darkVision = Token.defaultValues.darkVision,
 		trueSight = Token.defaultValues.trueSight,
 		vision = undefined
@@ -39,8 +39,8 @@ class Token {
 		this.color = color;
 		this.light = light;
 		// Make the light be cast from the edge of the token.
-		this.light.bright += size / 2;
-		this.light.dim += size / 2;
+		// this.light.bright += size / 2;
+		// this.light.dim += size / 2;
 
 		this.darkVision = darkVision;
 		this.trueSight = trueSight;
@@ -167,13 +167,14 @@ class Token {
 }
 
 class Light {
-	constructor(bright = 5, dim = 0) {
+	constructor(bright = 5, dim = 0, size = 0) {
 		this.bright = bright;
 		this.dim = dim;
+		this.size = size;
 	}
 
-	get brightRadius() { return this.bright; }
-	get dimRadius() { return this.dim + this.bright; }
+	get brightRadius() { return this.bright + this.size; }
+	get dimRadius() { return this.dim + this.brightRadius; }
 	get totalRadius() { return this.dimRadius; }
 }
 

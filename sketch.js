@@ -14,10 +14,8 @@ const BACKGROUND_COLOR = 0;
 
 const PIXEL_PER_SQUARE = 42;  // Px/Sq
 const FEET_PER_SQUARE = 5;  // Ft/Sq
-const SIGHT = 120; // Ft
-const RADIUS = PIXEL_PER_SQUARE * SIGHT / FEET_PER_SQUARE; // Px/Sq * Ft / Ft/Sq = Px 
-
-let rayG;
+// const SIGHT = 120; // Ft
+// const RADIUS = PIXEL_PER_SQUARE * SIGHT / FEET_PER_SQUARE; // Px/Sq * Ft / Ft/Sq = Px 
 
 let tokens = [];
 let holding = undefined;
@@ -47,11 +45,10 @@ function preload() {
 function setup() {
   createCanvas(W, H);
   background(BACKGROUND_COLOR);
-  // rayG = createGraphics(RADIUS * 2, RADIUS * 2);
   frameRate(30)
 
   tokens.push(new Token())
-  tokens.push(new Token(500, 500, 5, '#ab572d', new Light(60, 60), false, true))
+  tokens.push(new Token(500, 500, 5, '#ab572d', new Light(60, 0, 2.5), false, true))
 }
 
 function draw() {
@@ -69,8 +66,6 @@ function draw() {
   showTokens();
 
   showGrid();
-
-  print(frameRate())
 
   if(!mouseIsPressed) {
     noLoop()
