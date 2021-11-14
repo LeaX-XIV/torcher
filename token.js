@@ -14,7 +14,7 @@ class Token {
 			y: 270,
 			size: 5,
 			color: '#0F53BA',
-			light: new Light(22.5, 22.5),
+			light: new Light(20, 20),
 			darkVision: false,
 			trueSight: false,
 			// Left out to prevent huge memory allocation if not needed
@@ -23,14 +23,27 @@ class Token {
 	}
 
 	// size, light have values expressed in feet
-	constructor(x, y, size, color, light, darkVision, trueSight, vision) {
-		this.x = x || Token.defaultValues.x;
-		this.y = y || Token.defaultValues.y;
-		this.size = feet2Pixel(size || Token.defaultValues.size, Token.PIXEL_PER_FEET);
-		this.color = color || Token.defaultValues.color;
-		this.light = light || new Light(Token.defaultValues.light.bright, Token.defaultValues.light.dim);
-		this.darkVision = darkVision || Token.defaultValues.darkVision;
-		this.trueSight = trueSight || Token.defaultValues.trueSight;
+	constructor(
+		x = Token.defaultValues.x,
+		y = Token.defaultValues.y,
+		size = Token.defaultValues.size,
+		color = Token.defaultValues.color,
+		light = new Light(Token.defaultValues.light.bright, Token.defaultValues.light.dim),
+		darkVision = Token.defaultValues.darkVision,
+		trueSight = Token.defaultValues.trueSight,
+		vision = undefined
+	) {
+		this.x = x;
+		this.y = y;
+		this.size = feet2Pixel(size, Token.PIXEL_PER_FEET);
+		this.color = color;
+		this.light = light;
+		// Make the light be cast from the edge of the token.
+		this.light.bright += size / 2;
+		this.light.dim += size / 2;
+
+		this.darkVision = darkVision;
+		this.trueSight = trueSight;
 		this.vision = vision || new Vision(-1, -1, createGraphics(feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET), feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET)));
 	}
 
@@ -105,7 +118,7 @@ class Token {
 		Token.WALLS.loadPixels();
 		for(let t = 0; t <= TWO_PI; t += (TWO_PI / Token.RAYTRACE_POINTS)) {
 			let found = false;
-			for(let r = 0; r <= 1; r += 0.001) {
+			for(let r = 0; r <= 1; r += 0.05) {
 				let [relX, relY] = toCartesian(r * radius, t);
 				let index = toIndexInPixelArray(int(relX + this.x), int(relY + this.y));
 				let red = Token.WALLS.pixels[index];
@@ -154,9 +167,9 @@ class Token {
 }
 
 class Light {
-	constructor(bright, dim) {
-		this.bright = bright || 5;
-		this.dim = dim || 0;
+	constructor(bright = 5, dim = 0) {
+		this.bright = bright;
+		this.dim = dim;
 	}
 
 	get brightRadius() { return this.bright; }
@@ -178,7 +191,4 @@ const toPolar = (x, y) => [sqrt(x * x + y * y), atan2(y / x)];
 
 const toCartesian = (r, t) => [r * cos(t), r * sin(t)];
 
-function toIndexInPixelArray(x, y, w) {
-	w = w || W
-	return int((y * w + x) * pixelDensity() * 4)
-}
+const toIndexInPixelArray = (x, y, w = W) => int((y * w + x) * pixelDensity() * 4);
