@@ -1,0 +1,10 @@
+{
+	"map": "./map.jpg",
+	"map_walls": "./map_walls.png",
+	"grid_dx": 30,
+	"grid_dy": 30,
+	"grid_w": 1350,
+	"grid_h": 1350,
+	"grid_step": 30,
+	"background_color": "#000000ff"
+}
