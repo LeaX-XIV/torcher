@@ -13,16 +13,10 @@ let H = 380;
 
 let backgroundColor = 0;
 
-let grid_dx = 0;
-let grid_dy = 0;
-let grid_w = -1;
-let grid_h = -1;
-let pixelPerSquare = 1;  // Px/Sq
-
-const FEET_PER_SQUARE = 5;  // Ft/Sq
-
 let tokens = [];
 let holding = undefined;
+
+let grid = undefined;
 
 function preload() {
   loadJSON(SETTINGS_FILENAME, settings => {
@@ -38,12 +32,15 @@ function preload() {
       Token.WALLS = map_walls;
     });
 
-    grid_dx = settings['grid_dy'];
-    grid_dy = settings['grid_dx'];
-    grid_w = settings['grid_w'];
-    grid_h = settings['grid_h'];
-    pixelPerSquare = settings['grid_step'];
-    Token.PIXEL_PER_FEET = pixelPerSquare / FEET_PER_SQUARE;
+    let grid_x = settings['grid_dy'];
+    let grid_y = settings['grid_dx'];
+    let grid_width = settings['grid_w'];
+    let grid_height = settings['grid_h'];
+    let grid_squareSize = settings['grid_step'];
+
+    grid = new Grid(grid_x, grid_y, grid_width, grid_height, grid_squareSize);
+
+    Token.PIXEL_PER_FEET = grid.squareSize / Grid.FEET_PER_SQUARE;
 
     backgroundColor = settings['background_color'];
   });
@@ -81,7 +78,9 @@ function draw() {
 
   showTokens();
 
-  showGrid();
+  if(grid) {
+    grid.show();
+  }
 
   if(!mouseIsPressed) {
     noLoop()
@@ -135,23 +134,23 @@ function showTokens() {
   }
 }
 
-function showGrid() {
-  let limitH = grid_h === -1 ? H : (grid_h + grid_dx);
-  let limitW = grid_w === -1 ? W : (grid_w + grid_dy);
+// function showGrid() {
+//   let limitH = grid_h === -1 ? H : (grid_h + grid_dx);
+//   let limitW = grid_w === -1 ? W : (grid_w + grid_dy);
 
-  stroke(121);
-  strokeWeight(1);
-  // Horizontal lines
-  for(let i = grid_dy; i < limitW; i += pixelPerSquare) {
-    line(i, grid_dx, i, limitH);
-  }
-  line(limitW, grid_dx, limitW, limitH);
-  // Vertical lines
-  for(let i = grid_dx; i < limitH; i += pixelPerSquare) {
-    line(grid_dy, i, limitW, i);
-  }
-  line(grid_dy, limitH, limitW, limitH);
-}
+//   stroke(121);
+//   strokeWeight(1);
+//   // Horizontal lines
+//   for(let i = grid_dy; i < limitW; i += pixelPerSquare) {
+//     line(i, grid_dx, i, limitH);
+//   }
+//   line(limitW, grid_dx, limitW, limitH);
+//   // Vertical lines
+//   for(let i = grid_dx; i < limitH; i += pixelPerSquare) {
+//     line(grid_dy, i, limitW, i);
+//   }
+//   line(grid_dy, limitH, limitW, limitH);
+// }
 
 function showWalls() {
   imageMode(CORNER)
