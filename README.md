@@ -19,8 +19,8 @@ The settings are loaded from `./settings.json`. The file contains the following 
 | *map_walls*        | Filepath to the map walls image                              | `"./map_walls.png"`             |
 | *background_color* | Color of the (walkable) map when non lit by light            | `"#000000FF"`, `"#000000"`, ... |
 | *grid*             | (Optional) Object to describe the grid that overlays the map |                                 |
-| grid.*x*           | Horizontal displacement of the top-left corner of the grid   | `15`, `0`, `-5`, ...            |
-| grid.*y*           | Vertical displacement of the top-left corner of the grid     | `15`, `0`, `-5`, ...            |
+| grid.*x*           | Horizontal displacement of the top-left corner of the grid   | `15`, `0`, ...                  |
+| grid.*y*           | Vertical displacement of the top-left corner of the grid     | `15`, `0`, ...                  |
 | grid.*widht*       | Width of the grid. Use `-1` to fill the canvas               | `1500`, `-1`, ...               |
 | grid.*height*      | Height of the grid. Use `-1` to fill the canvas              | `1500`, `-1`, ...               |
 | grid.*square_size* | Side of the grid squares in pixels. 1 square = 5'            | `30`, `25`, ...                 |

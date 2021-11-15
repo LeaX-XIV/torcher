@@ -192,4 +192,4 @@ const toPolar = (x, y) => [sqrt(x * x + y * y), atan2(y / x)];
 
 const toCartesian = (r, t) => [r * cos(t), r * sin(t)];
 
-const toIndexInPixelArray = (x, y, w = W) => int((y * w + x) * pixelDensity() * 4);
+const toIndexInPixelArray = (x, y, w = imgW) => int((y * w + x) * pixelDensity() * 4);

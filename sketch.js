@@ -8,8 +8,8 @@ let dim_mask;
 let circle_mask;
 let map_walls;
 
-let W = 420;
-let H = 380;
+let imgW = 0;
+let imgH = 0;
 
 let backgroundColor = 0;
 
@@ -19,12 +19,12 @@ let holding = undefined;
 let grid = undefined;
 
 function preload() {
+  grid = new Grid();
   loadJSON(SETTINGS_FILENAME, settings => {
     loadImage(settings['map'], img => {
       map_bg = img;
-      W = img.width;
-      H = img.height;
-      resizeCanvas(W, H);
+      imgW = img.width;
+      imgH = img.height;
       Token.TERRAIN = map_bg;
     });
     loadImage(settings['map_walls'], img => {
@@ -45,7 +45,6 @@ function preload() {
       } else {
         grid = new Grid(grid_x, grid_y, grid_width, grid_height, grid_squareSize, grid_color);
       }
-
       Token.PIXEL_PER_FEET = grid.squareSize / Grid.FEET_PER_SQUARE;
     }
 
@@ -63,7 +62,8 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(W, H);
+  const [w, h] = getCanvasSize();
+  createCanvas(w, h);
   background(backgroundColor);
   frameRate(30)
 
@@ -72,6 +72,8 @@ function setup() {
 }
 
 function draw() {
+  translate(-grid.x, -grid.y);
+
   clear();
   background(backgroundColor);
 
@@ -85,9 +87,7 @@ function draw() {
 
   showTokens();
 
-  if(grid) {
-    grid.show();
-  }
+  grid.show();
 
   if(!mouseIsPressed) {
     noLoop()
@@ -96,7 +96,7 @@ function draw() {
 
 function mousePressed() {
   for(tk of tokens) {
-    if(tk.intersect(mouseX, mouseY)) {
+    if(tk.intersect(mouseX + grid.x, mouseY + grid.y)) {
       holding = tk;
       loop()
       break;
@@ -144,4 +144,11 @@ function showTokens() {
 function showWalls() {
   imageMode(CORNER)
   image(map_walls, 0, 0);
+}
+
+function getCanvasSize() {
+  const w = (grid.width <= 0 ? imgW : grid.width) - grid.x
+  const h = (grid.height <= 0 ? imgH : grid.height) - grid.y;
+
+  return [w, h];
 }
