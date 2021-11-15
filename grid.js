@@ -1,7 +1,7 @@
 class Grid {
 	static FEET_PER_SQUARE = 5;
 
-	constructor(x = 0, y = 0, width = -1, height = -1, squareSize = 1, color = "#797979") {
+	constructor(x = 0, y = 0, width = -1, height = -1, squareSize = 50, color = "#696969") {
 		this.x = x;
 		this.y = y;
 		this.width = width;

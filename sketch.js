@@ -32,15 +32,22 @@ function preload() {
       Token.WALLS = map_walls;
     });
 
-    let grid_x = settings['grid_dy'];
-    let grid_y = settings['grid_dx'];
-    let grid_width = settings['grid_w'];
-    let grid_height = settings['grid_h'];
-    let grid_squareSize = settings['grid_step'];
+    if("grid" in settings) {
+      let grid_x = settings['grid']['x'];
+      let grid_y = settings['grid']['y'];
+      let grid_width = settings['grid']['width'];
+      let grid_height = settings['grid']['height'];
+      let grid_squareSize = settings['grid']['square_size'];
+      let grid_color = settings['grid']['color'];
 
-    grid = new Grid(grid_x, grid_y, grid_width, grid_height, grid_squareSize);
+      if(grid_color === undefined) {
+        grid = new Grid(grid_x, grid_y, grid_width, grid_height, grid_squareSize);
+      } else {
+        grid = new Grid(grid_x, grid_y, grid_width, grid_height, grid_squareSize, grid_color);
+      }
 
-    Token.PIXEL_PER_FEET = grid.squareSize / Grid.FEET_PER_SQUARE;
+      Token.PIXEL_PER_FEET = grid.squareSize / Grid.FEET_PER_SQUARE;
+    }
 
     backgroundColor = settings['background_color'];
   });
@@ -133,24 +140,6 @@ function showTokens() {
     tk.showSelf();
   }
 }
-
-// function showGrid() {
-//   let limitH = grid_h === -1 ? H : (grid_h + grid_dx);
-//   let limitW = grid_w === -1 ? W : (grid_w + grid_dy);
-
-//   stroke(121);
-//   strokeWeight(1);
-//   // Horizontal lines
-//   for(let i = grid_dy; i < limitW; i += pixelPerSquare) {
-//     line(i, grid_dx, i, limitH);
-//   }
-//   line(limitW, grid_dx, limitW, limitH);
-//   // Vertical lines
-//   for(let i = grid_dx; i < limitH; i += pixelPerSquare) {
-//     line(grid_dy, i, limitW, i);
-//   }
-//   line(grid_dy, limitH, limitW, limitH);
-// }
 
 function showWalls() {
   imageMode(CORNER)

@@ -1,7 +1,7 @@
 class Token {
 	static RAYTRACE_POINTS = 50;
 
-	static PIXEL_PER_FEET = 1 / 5;
+	static PIXEL_PER_FEET = 50 / Grid.FEET_PER_SQUARE;
 
 	static CIRCLE_MASK = circle_mask;
 	static DIM_MASK = dim_mask;
