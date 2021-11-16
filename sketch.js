@@ -38,12 +38,13 @@ function preload() {
       let grid_width = settings['grid']['width'];
       let grid_height = settings['grid']['height'];
       let grid_squareSize = settings['grid']['square_size'];
+      let grid_snapToGrid = settings['grid']['snap_to_grid'];
       let grid_color = settings['grid']['color'];
 
       if(grid_color === undefined) {
-        grid = new Grid(grid_x, grid_y, grid_width, grid_height, grid_squareSize);
+        grid = new Grid(grid_x, grid_y, grid_width, grid_height, grid_squareSize, grid_snapToGrid);
       } else {
-        grid = new Grid(grid_x, grid_y, grid_width, grid_height, grid_squareSize, grid_color);
+        grid = new Grid(grid_x, grid_y, grid_width, grid_height, grid_squareSize, grid_snapToGrid, grid_color);
       }
       Token.PIXEL_PER_FEET = grid.squareSize / Grid.FEET_PER_SQUARE;
     }
@@ -112,6 +113,11 @@ function mouseDragged() {
 }
 
 function mouseReleased() {
+  if(holding && grid.snapToGrid) {
+    const [x, y, w, h] = grid.xywhOfSquareFromCoords(mouseX, mouseY);
+    holding.moveTo(x + w / 2 + grid.x, y + h / 2 + grid.y);
+  }
+
   holding = undefined;
   noLoop()
 }

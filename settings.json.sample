@@ -8,6 +8,7 @@
 		"width": 1350,
 		"height": 1350,
 		"square_size": 30,
+		"snap_to_grid": false,
 		"color": "#badf000d"
 	}
 }
