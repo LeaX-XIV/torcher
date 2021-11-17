@@ -1,7 +1,8 @@
 {
-	"map": "./map.jpg",
-	"map_walls": "./map_walls.png",
+	"map": "path/to/map.jpg",
+	"map_walls": "path/to/map_walls.png",
 	"background_color": "#000000ff",
+	"obfuscate_on_movement": true,
 	"grid": {
 		"x": 30,
 		"y": 30,

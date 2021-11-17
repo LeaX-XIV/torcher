@@ -45,10 +45,12 @@ class Token {
 		this.darkVision = darkVision;
 		this.trueSight = trueSight;
 		this.vision = vision || new Vision(-1, -1, createGraphics(feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET), feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET)));
+
+		this.updateTerrain = true;
 	}
 
 	update() {
-		if(this.x !== this.vision.x || this.y !== this.vision.y) {
+		if(this.updateTerrain && (this.x !== this.vision.x || this.y !== this.vision.y)) {
 			// Recreate vision
 			let terrainVision = this.#generateTerrainView(feet2Pixel(this.light.totalRadius, Token.PIXEL_PER_FEET));
 
@@ -60,11 +62,19 @@ class Token {
 		}
 	}
 
+	pickUp() {
+		this.updateTerrain = false;
+	}
+
+	putDown() {
+		this.updateTerrain = true;
+	}
+
 	showTerrain(trueSight) {
 		imageMode(CENTER);
 		if(this.trueSight && trueSight) {
 			blendMode(LIGHTEST);
-			image(this.vision.vision, this.x, this.y, this.vision.vision.width, this.vision.vision.height);
+			image(this.vision.vision, this.vision.x, this.vision.y, this.vision.vision.width, this.vision.vision.height);
 			blendMode(BLEND);
 			return;
 		} else if(this.trueSight && !trueSight) {
@@ -79,9 +89,9 @@ class Token {
 			dimSight.mask(Token.DIM_MASK);
 			dimSight.filter(GRAY)
 		}
-		image(dimSight, this.x, this.y);
+		image(dimSight, this.vision.x, this.vision.y);
 		if(!this.darkVision) {
-			image(brightSight, this.x, this.y);
+			image(brightSight, this.vision.x, this.vision.y);
 		}
 		blendMode(BLEND);
 	}

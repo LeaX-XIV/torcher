@@ -13,16 +13,17 @@ A simulator for light and vision inside a dark dungeon.
 ## Settings
 
 The settings are loaded from `./settings.json`. The file contains the following fields:
-| Field               | Description                                                            | Example                         |
-| ------------------- | ---------------------------------------------------------------------- | ------------------------------- |
-| *map*               | Filepath to the map image                                              | `"./map.jpg"`                   |
-| *map_walls*         | Filepath to the map walls image                                        | `"./map_walls.png"`             |
-| *background_color*  | Color of the (walkable) map when non lit by light                      | `"#000000FF"`, `"#000000"`, ... |
-| *grid*              | (Optional) Object to describe the grid that overlays the map           |                                 |
-| grid.*x*            | Horizontal displacement of the top-left corner of the grid             | `15`, `0`, ...                  |
-| grid.*y*            | Vertical displacement of the top-left corner of the grid               | `15`, `0`, ...                  |
-| grid.*widht*        | Width of the grid. Use `-1` to fill the canvas                         | `1500`, `-1`, ...               |
-| grid.*height*       | Height of the grid. Use `-1` to fill the canvas                        | `1500`, `-1`, ...               |
-| grid.*square_size*  | Side of the grid squares in pixels. 1 square = 5'                      | `30`, `25`, ...                 |
-| grid.*snap_to_grid* | Whether to confine the tokens fully inside a square of the grid or not | `true`, `false`, ...            |
-| grid.*color*        | (Optional) Color of the grid. Defaults to "#696969"                    | `"#FFFFFFFF"`, `#505050`, ...   |
+| Field                   | Description                                                                                                                                                                | Example                         |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| *map*                   | Filepath to the map image                                                                                                                                                  | `"path/to/map.jpg"`             |
+| *map_walls*             | Filepath to the map walls image                                                                                                                                            | `"path/to/map_walls.png"`       |
+| *background_color*      | Color of the (walkable) map when non lit by light                                                                                                                          | `"#000000FF"`, `"#000000"`, ... |
+| *obfuscate_on_movement* | (Optional) If `true`, the terrain vision will only be updated when the token is released.<br />If `false`, the terrain vision follows the moving token. Defaults to `true` | `true`, `false`                 |
+| *grid*                  | (Optional) Object to describe the grid that overlays the map                                                                                                               |                                 |
+| grid.*x*                | Horizontal displacement of the top-left corner of the grid                                                                                                                 | `15`, `0`, ...                  |
+| grid.*y*                | Vertical displacement of the top-left corner of the grid                                                                                                                   | `15`, `0`, ...                  |
+| grid.*widht*            | Width of the grid. Use `-1` to fill the canvas                                                                                                                             | `1500`, `-1`, ...               |
+| grid.*height*           | Height of the grid. Use `-1` to fill the canvas                                                                                                                            | `1500`, `-1`, ...               |
+| grid.*square_size*      | Side of the grid squares in pixels. 1 square = 5'                                                                                                                          | `30`, `25`, ...                 |
+| grid.*snap_to_grid*     | Whether to confine the tokens fully inside a square of the grid or not                                                                                                     | `true`, `false`                 |
+| grid.*color*            | (Optional) Color of the grid. Defaults to `"#696969"`                                                                                                                      | `"#FFFFFFFF"`, `#505050`, ...   |

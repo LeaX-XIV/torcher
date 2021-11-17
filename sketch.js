@@ -12,6 +12,7 @@ let imgW = 0;
 let imgH = 0;
 
 let backgroundColor = 0;
+let obfuscateOnMovement = true;
 
 let tokens = [];
 let holding = undefined;
@@ -50,6 +51,10 @@ function preload() {
     }
 
     backgroundColor = settings['background_color'];
+
+    if("obfuscate_on_movement" in settings) {
+      obfuscateOnMovement = settings["obfuscate_on_movement"];
+    }
   });
 
   loadImage(CIRCLE_MASK_NAME, img => {
@@ -99,6 +104,9 @@ function mousePressed() {
   for(tk of tokens) {
     if(tk.intersect(mouseX + grid.x, mouseY + grid.y)) {
       holding = tk;
+      if(obfuscateOnMovement) {
+        holding.pickUp()
+      }
       loop()
       break;
     }
@@ -118,6 +126,9 @@ function mouseReleased() {
     holding.moveTo(x + w / 2 + grid.x, y + h / 2 + grid.y);
   }
 
+  if(holding && obfuscateOnMovement) {
+    holding.putDown();
+  }
   holding = undefined;
   noLoop()
 }
