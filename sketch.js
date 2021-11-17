@@ -101,14 +101,17 @@ function draw() {
 }
 
 function mousePressed() {
-  for(tk of tokens) {
-    if(tk.intersect(mouseX + grid.x, mouseY + grid.y)) {
-      holding = tk;
-      if(obfuscateOnMovement) {
-        holding.pickUp()
+  if(mouseButton === LEFT) {
+    for(tk of tokens) {
+      if(tk.intersect(mouseX + grid.x, mouseY + grid.y)) {
+        holding = tk;
+        holding.recordLastKnownLocation();
+        if(obfuscateOnMovement) {
+          holding.pickUp()
+        }
+        loop()
+        break;
       }
-      loop()
-      break;
     }
   }
 }
@@ -121,16 +124,27 @@ function mouseDragged() {
 }
 
 function mouseReleased() {
-  if(holding && grid.snapToGrid) {
-    const [x, y, w, h] = grid.xywhOfSquareFromCoords(mouseX, mouseY);
-    holding.moveTo(x + w / 2 + grid.x, y + h / 2 + grid.y);
-  }
+  if(mouseButton === LEFT) {
+    if(holding && grid.snapToGrid) {
+      const [x, y, w, h] = grid.xywhOfSquareFromCoords(mouseX, mouseY);
+      holding.moveTo(x + w / 2 + grid.x, y + h / 2 + grid.y);
+    }
 
-  if(holding && obfuscateOnMovement) {
-    holding.putDown();
+    // if(holding && obfuscateOnMovement) {
+    if(holding) {
+      holding.putDown();
+    }
+    holding = undefined;
+    noLoop()
   }
-  holding = undefined;
-  noLoop()
+}
+
+function keyPressed() {
+  if(keyCode === ESCAPE && holding) {
+    holding.restoreLastKnownPosition();
+    holding.putDown();
+    holding = undefined;
+  }
 }
 
 function showTerrains() {

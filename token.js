@@ -47,6 +47,7 @@ class Token {
 		this.vision = vision || new Vision(-1, -1, createGraphics(feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET), feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET)));
 
 		this.updateTerrain = true;
+		this.lastKnownPos = undefined;
 	}
 
 	update() {
@@ -68,6 +69,16 @@ class Token {
 
 	putDown() {
 		this.updateTerrain = true;
+		this.lastKnownPos = undefined;
+	}
+
+	recordLastKnownLocation() {
+		this.lastKnownPos = [this.x, this.y];
+	}
+
+	restoreLastKnownPosition() {
+		this.moveTo(...this.lastKnownPos);
+		this.lastKnownPos = undefined;
 	}
 
 	showTerrain(trueSight) {
