@@ -1,10 +1,15 @@
 {
-	"map": "./map.jpg",
-	"map_walls": "./map_walls.png",
-	"grid_dx": 30,
-	"grid_dy": 30,
-	"grid_w": 1350,
-	"grid_h": 1350,
-	"grid_step": 30,
-	"background_color": "#000000ff"
+	"map": "path/to/map.jpg",
+	"map_walls": "path/to/map_walls.png",
+	"background_color": "#000000ff",
+	"obfuscate_on_movement": true,
+	"grid": {
+		"x": 30,
+		"y": 30,
+		"width": 1350,
+		"height": 1350,
+		"square_size": 30,
+		"snap_to_grid": false,
+		"color": "#badf000d"
+	}
 }

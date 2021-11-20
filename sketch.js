@@ -8,29 +8,24 @@ let dim_mask;
 let circle_mask;
 let map_walls;
 
-let W = 420;
-let H = 380;
+let imgW = 0;
+let imgH = 0;
 
 let backgroundColor = 0;
-
-let grid_dx = 0;
-let grid_dy = 0;
-let grid_w = -1;
-let grid_h = -1;
-let pixelPerSquare = 1;  // Px/Sq
-
-const FEET_PER_SQUARE = 5;  // Ft/Sq
+let obfuscateOnMovement = true;
 
 let tokens = [];
 let holding = undefined;
 
+let grid = undefined;
+
 function preload() {
+  grid = new Grid();
   loadJSON(SETTINGS_FILENAME, settings => {
     loadImage(settings['map'], img => {
       map_bg = img;
-      W = img.width;
-      H = img.height;
-      resizeCanvas(W, H);
+      imgW = img.width;
+      imgH = img.height;
       Token.TERRAIN = map_bg;
     });
     loadImage(settings['map_walls'], img => {
@@ -38,14 +33,28 @@ function preload() {
       Token.WALLS = map_walls;
     });
 
-    grid_dx = settings['grid_dy'];
-    grid_dy = settings['grid_dx'];
-    grid_w = settings['grid_w'];
-    grid_h = settings['grid_h'];
-    pixelPerSquare = settings['grid_step'];
-    Token.PIXEL_PER_FEET = pixelPerSquare / FEET_PER_SQUARE;
+    if("grid" in settings) {
+      let grid_x = settings['grid']['x'];
+      let grid_y = settings['grid']['y'];
+      let grid_width = settings['grid']['width'];
+      let grid_height = settings['grid']['height'];
+      let grid_squareSize = settings['grid']['square_size'];
+      let grid_snapToGrid = settings['grid']['snap_to_grid'];
+      let grid_color = settings['grid']['color'];
+
+      if(grid_color === undefined) {
+        grid = new Grid(grid_x, grid_y, grid_width, grid_height, grid_squareSize, grid_snapToGrid);
+      } else {
+        grid = new Grid(grid_x, grid_y, grid_width, grid_height, grid_squareSize, grid_snapToGrid, grid_color);
+      }
+      Token.PIXEL_PER_FEET = grid.squareSize / Grid.FEET_PER_SQUARE;
+    }
 
     backgroundColor = settings['background_color'];
+
+    if("obfuscate_on_movement" in settings) {
+      obfuscateOnMovement = settings["obfuscate_on_movement"];
+    }
   });
 
   loadImage(CIRCLE_MASK_NAME, img => {
@@ -59,7 +68,8 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(W, H);
+  const [w, h] = getCanvasSize();
+  createCanvas(w, h);
   background(backgroundColor);
   frameRate(30)
 
@@ -68,6 +78,8 @@ function setup() {
 }
 
 function draw() {
+  translate(-grid.x, -grid.y);
+
   clear();
   background(backgroundColor);
 
@@ -81,7 +93,7 @@ function draw() {
 
   showTokens();
 
-  showGrid();
+  grid.show();
 
   if(!mouseIsPressed) {
     noLoop()
@@ -89,11 +101,17 @@ function draw() {
 }
 
 function mousePressed() {
-  for(tk of tokens) {
-    if(tk.intersect(mouseX, mouseY)) {
-      holding = tk;
-      loop()
-      break;
+  if(mouseButton === LEFT) {
+    for(tk of tokens) {
+      if(tk.intersect(mouseX + grid.x, mouseY + grid.y)) {
+        holding = tk;
+        holding.recordLastKnownLocation();
+        if(obfuscateOnMovement) {
+          holding.pickUp()
+        }
+        loop()
+        break;
+      }
     }
   }
 }
@@ -106,8 +124,27 @@ function mouseDragged() {
 }
 
 function mouseReleased() {
-  holding = undefined;
-  noLoop()
+  if(mouseButton === LEFT) {
+    if(holding && grid.snapToGrid) {
+      const [x, y, w, h] = grid.xywhOfSquareFromCoords(mouseX, mouseY);
+      holding.moveTo(x + w / 2 + grid.x, y + h / 2 + grid.y);
+    }
+
+    // if(holding && obfuscateOnMovement) {
+    if(holding) {
+      holding.putDown();
+    }
+    holding = undefined;
+    noLoop()
+  }
+}
+
+function keyPressed() {
+  if(keyCode === ESCAPE && holding) {
+    holding.restoreLastKnownPosition();
+    holding.putDown();
+    holding = undefined;
+  }
 }
 
 function showTerrains() {
@@ -135,25 +172,14 @@ function showTokens() {
   }
 }
 
-function showGrid() {
-  let limitH = grid_h === -1 ? H : (grid_h + grid_dx);
-  let limitW = grid_w === -1 ? W : (grid_w + grid_dy);
-
-  stroke(121);
-  strokeWeight(1);
-  // Horizontal lines
-  for(let i = grid_dy; i < limitW; i += pixelPerSquare) {
-    line(i, grid_dx, i, limitH);
-  }
-  line(limitW, grid_dx, limitW, limitH);
-  // Vertical lines
-  for(let i = grid_dx; i < limitH; i += pixelPerSquare) {
-    line(grid_dy, i, limitW, i);
-  }
-  line(grid_dy, limitH, limitW, limitH);
-}
-
 function showWalls() {
   imageMode(CORNER)
   image(map_walls, 0, 0);
+}
+
+function getCanvasSize() {
+  const w = (grid.width <= 0 ? imgW : grid.width) - grid.x
+  const h = (grid.height <= 0 ? imgH : grid.height) - grid.y;
+
+  return [w, h];
 }

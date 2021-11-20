@@ -1,7 +1,7 @@
 class Token {
 	static RAYTRACE_POINTS = 50;
 
-	static PIXEL_PER_FEET = 1 / 5;
+	static PIXEL_PER_FEET = 50 / Grid.FEET_PER_SQUARE;
 
 	static CIRCLE_MASK = circle_mask;
 	static DIM_MASK = dim_mask;
@@ -45,10 +45,13 @@ class Token {
 		this.darkVision = darkVision;
 		this.trueSight = trueSight;
 		this.vision = vision || new Vision(-1, -1, createGraphics(feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET), feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET)));
+
+		this.updateTerrain = true;
+		this.lastKnownPos = undefined;
 	}
 
 	update() {
-		if(this.x !== this.vision.x || this.y !== this.vision.y) {
+		if(this.updateTerrain && (this.x !== this.vision.x || this.y !== this.vision.y)) {
 			// Recreate vision
 			let terrainVision = this.#generateTerrainView(feet2Pixel(this.light.totalRadius, Token.PIXEL_PER_FEET));
 
@@ -60,11 +63,29 @@ class Token {
 		}
 	}
 
+	pickUp() {
+		this.updateTerrain = false;
+	}
+
+	putDown() {
+		this.updateTerrain = true;
+		this.lastKnownPos = undefined;
+	}
+
+	recordLastKnownLocation() {
+		this.lastKnownPos = [this.x, this.y];
+	}
+
+	restoreLastKnownPosition() {
+		this.moveTo(...this.lastKnownPos);
+		this.lastKnownPos = undefined;
+	}
+
 	showTerrain(trueSight) {
 		imageMode(CENTER);
 		if(this.trueSight && trueSight) {
 			blendMode(LIGHTEST);
-			image(this.vision.vision, this.x, this.y, this.vision.vision.width, this.vision.vision.height);
+			image(this.vision.vision, this.vision.x, this.vision.y, this.vision.vision.width, this.vision.vision.height);
 			blendMode(BLEND);
 			return;
 		} else if(this.trueSight && !trueSight) {
@@ -79,9 +100,9 @@ class Token {
 			dimSight.mask(Token.DIM_MASK);
 			dimSight.filter(GRAY)
 		}
-		image(dimSight, this.x, this.y);
+		image(dimSight, this.vision.x, this.vision.y);
 		if(!this.darkVision) {
-			image(brightSight, this.x, this.y);
+			image(brightSight, this.vision.x, this.vision.y);
 		}
 		blendMode(BLEND);
 	}
@@ -94,8 +115,12 @@ class Token {
 	}
 
 	move(dx, dy) {
-		this.x += dx;
-		this.y += dy;
+		this.moveTo(this.x + dx, this.y + dy);
+	}
+
+	moveTo(x, y) {
+		this.x = x;
+		this.y = y;
 	}
 
 	intersect(x, y) {
@@ -192,4 +217,4 @@ const toPolar = (x, y) => [sqrt(x * x + y * y), atan2(y / x)];
 
 const toCartesian = (r, t) => [r * cos(t), r * sin(t)];
 
-const toIndexInPixelArray = (x, y, w = W) => int((y * w + x) * pixelDensity() * 4);
+const toIndexInPixelArray = (x, y, w = imgW) => int((y * w + x) * pixelDensity() * 4);
