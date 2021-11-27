@@ -11,5 +11,23 @@
 		"square_size": 30,
 		"snap_to_grid": false,
 		"color": "#badf000d"
-	}
+	},
+	"tokens": [
+		{ "color": "#badf000d" },
+		{
+			"x": 0,
+			"y": 0,
+			"size": "medium",
+			"color": "#ab572d",
+			"light": [60, 0],
+			"darkVision": false,
+			"trueSight": true
+		},
+		{
+			"x": 20,
+			"y": 8,
+			"color": "#ab57fd",
+			"light": [0, 30]
+		}
+	]
 }

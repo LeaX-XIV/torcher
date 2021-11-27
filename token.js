@@ -8,6 +8,15 @@ class Token {
 	static TERRAIN = map_bg;
 	static WALLS = map_walls;
 
+	static SIZES = {
+		tiny: 2.5,
+		small: 5,
+		medium: 5,
+		large: 10,
+		huge: 15,
+		gargantuan: 20
+	};
+
 	static get defaultValues() {
 		return {
 			x: 400,

@@ -50,6 +50,28 @@ function preload() {
       Token.PIXEL_PER_FEET = grid.squareSize / Grid.FEET_PER_SQUARE;
     }
 
+    if("tokens" in settings) {
+      for(const t of settings['tokens']) {
+        const row = "x" in t ? t['x'] : 0;
+        const col = "y" in t ? t['y'] : 0;
+        const size = "size" in t ? t['size'] : "medium";
+        const color = "color" in t ? t['color'] : "#0F53BA";
+        const light = "light" in t ? t['light'] : [20, 20];
+        const darkVision = "darkVision" in t ? t['darkVision'] : false;
+        const trueSight = "trueSight" in t ? t['trueSight'] : false;
+
+        // if(Token.SIZES[size] === undefined) {
+        if(size !== "medium") {
+          throw new TypeError(`Unexpected size '${size}'`);
+        }
+        const sizeFeet = Token.SIZES[size];
+        const [x, y, w, h] = grid.xywhOfSquare(row, col);
+
+        const newToken = new Token(x + w / 2 + grid.x, y + h / 2 + grid.y, sizeFeet, color, new Light(light[0], light[1], sizeFeet / 2), darkVision, trueSight);
+        tokens.push(newToken);
+      }
+    }
+
     backgroundColor = settings['background_color'];
 
     if("obfuscate_on_movement" in settings) {
@@ -72,9 +94,6 @@ function setup() {
   createCanvas(w, h);
   background(backgroundColor);
   frameRate(30)
-
-  tokens.push(new Token())
-  tokens.push(new Token(500, 500, 5, '#ab572d', new Light(60, 0, 2.5), false, true))
 }
 
 function draw() {
