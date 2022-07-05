@@ -14,6 +14,7 @@ let imgH = 0;
 let backgroundColor = 0;
 let obfuscateOnMovement = true;
 
+let tokensData = [];
 let tokens = [];
 let holding = undefined;
 
@@ -51,25 +52,31 @@ function preload() {
     }
 
     if("tokens" in settings) {
-      for(const t of settings['tokens']) {
-        const row = "x" in t ? t['x'] : 0;
-        const col = "y" in t ? t['y'] : 0;
-        const size = "size" in t ? t['size'] : "medium";
-        const color = "color" in t ? t['color'] : "#0F53BA";
-        const borderColor = "borderColor" in t ? t['borderColor'] : undefined;
-        const light = "light" in t ? t['light'] : [20, 20];
-        const darkVision = "darkVision" in t ? t['darkVision'] : false;
-        const trueSight = "trueSight" in t ? t['trueSight'] : false;
+      for(const i in settings['tokens']) {
+        const t = settings['tokens'][i];
 
-        if(Token.SIZES[size] === undefined) {
+        tokensData[i] = {};
+        tokensData[i].row = "x" in t ? t['x'] : 0;
+        tokensData[i].col = "y" in t ? t['y'] : 0;
+        tokensData[i].size = "size" in t ? t['size'] : "medium";
+        tokensData[i].color = "color" in t ? t['color'] : "#0F53BA";
+        tokensData[i].borderColor = "borderColor" in t ? t['borderColor'] : undefined;
+        tokensData[i].tokenImgPath = "image" in t ? t['image'] : undefined;
+        tokensData[i].light = "light" in t ? t['light'] : [20, 20];
+        tokensData[i].darkVision = "darkVision" in t ? t['darkVision'] : false;
+        tokensData[i].trueSight = "trueSight" in t ? t['trueSight'] : false;
+
+        if(Token.SIZES[tokensData[i].size] === undefined) {
         // if(size !== "medium") {
-          throw new TypeError(`Unexpected size '${size}'`);
+          throw new TypeError(`Unexpected size '${tokensData[i].size}'`);
         }
-        const sizeFeet = Token.SIZES[size];
-        const [x, y, w, h] = grid.xywhOfSquare(row, col);
-
-        const newToken = new Token(x + grid.x, y + grid.y, sizeFeet, color, borderColor, new Light(light[0], light[1], sizeFeet / 2), darkVision, trueSight);
-        tokens.push(newToken);
+        if(tokensData[i].tokenImgPath !== undefined) {
+          loadImage(tokensData[i].tokenImgPath, img => {
+            tokensData[i].image = img;
+          });
+        }
+        tokensData[i].sizeFeet = Token.SIZES[tokensData[i].size];
+        [tokensData[i].x, tokensData[i].y, tokensData[i].w, tokensData[i].h] = grid.xywhOfSquare(tokensData[i].row, tokensData[i].col);
       }
     }
 
@@ -91,6 +98,11 @@ function preload() {
 }
 
 function setup() {
+  for(const td of tokensData) {
+    const newToken = new Token(td.i, td.x + grid.x, td.y + grid.y, td.sizeFeet, td.color, td.borderColor, td.image, new Light(td.light[0], td.light[1], td.sizeFeet / 2), td.darkVision, td.trueSight);
+    tokens.push(newToken);
+  }
+
   const [w, h] = getCanvasSize();
   createCanvas(w, h);
   background(backgroundColor);
@@ -122,7 +134,8 @@ function draw() {
 
 function mousePressed() {
   if(mouseButton === LEFT) {
-    for(tk of tokens) {
+    for(let i = tokens.length - 1; i >= 0; --i) {
+      const tk = tokens[i];
       if(tk.intersect(mouseX + grid.x, mouseY + grid.y)) {
         holding = tk;
         holding.recordLastKnownLocation();

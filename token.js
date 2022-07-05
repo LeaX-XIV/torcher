@@ -25,6 +25,7 @@ class Token {
 			size: 5,
 			color: '#0F53BA',
 			borderColor: undefined,
+			image: undefined,
 			light: new Light(20, 20),
 			darkVision: false,
 			trueSight: false,
@@ -35,20 +36,24 @@ class Token {
 
 	// size, light have values expressed in feet
 	constructor(
+		id,
 		x = Token.defaultValues.x,
 		y = Token.defaultValues.y,
 		size = Token.defaultValues.size,
 		color = Token.defaultValues.color,
 		borderColor = Token.defaultValues.borderColor,
+		image = Token.defaultValues.image,
 		light = new Light(Token.defaultValues.light.bright, Token.defaultValues.light.dim, Token.defaultValues.size / 2),
 		darkVision = Token.defaultValues.darkVision,
 		trueSight = Token.defaultValues.trueSight,
 		vision = undefined
 	) {
+		this.id = id;
 		this.x = x;
 		this.y = y;
 		this.size = feet2Pixel(size, Token.PIXEL_PER_FEET);
 		this.color = color;
+		this.image = image;
 		this.light = light;
 		// Make the light be cast from the edge of the token.
 		// this.light.bright += size / 2;
@@ -143,6 +148,13 @@ class Token {
 		}
 		fill(color(this.color));
 		circle(this.x + this.size / 2, this.y + this.size / 2, this.size);
+		if(this.image) {
+			imageMode(CENTER);
+			image(this.image, this.x + this.size / 2, this.y + this.size / 2, this.size * 0.9, this.size * 0.9);
+			// rectMode(CENTER);
+			// noFill();
+			// rect(this.x + this.size / 2, this.y + this.size / 2, this.size * 0.9, this.size * 0.9);
+		}
 	}
 
 	move(dx, dy) {
