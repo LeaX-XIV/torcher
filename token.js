@@ -64,8 +64,7 @@ class Token {
 		if(borderColor === undefined) {
 			let [r, g, b] = convertToRGB(this.color.substring(1));
 			let [h, s, l] = rgbToHsl(r, g, b);
-			
-			if(l < 0.5) {
+			if(l < 0.25) {
 				l += 0.25;
 			} else {
 				l -= 0.25;
