@@ -20,6 +20,7 @@
 			"size": "medium",
 			"color": "#ab572d",
 			"borderColor": "#000000",
+			"image": "path/to/monster.png",
 			"light": [60, 0],
 			"darkVision": false,
 			"trueSight": true
