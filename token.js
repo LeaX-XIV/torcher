@@ -24,6 +24,7 @@ class Token {
 			y: 270,
 			size: 5,
 			color: '#0F53BA',
+			borderColor: undefined,
 			light: new Light(20, 20),
 			darkVision: false,
 			trueSight: false,
@@ -38,6 +39,7 @@ class Token {
 		y = Token.defaultValues.y,
 		size = Token.defaultValues.size,
 		color = Token.defaultValues.color,
+		borderColor = Token.defaultValues.borderColor,
 		light = new Light(Token.defaultValues.light.bright, Token.defaultValues.light.dim, Token.defaultValues.size / 2),
 		darkVision = Token.defaultValues.darkVision,
 		trueSight = Token.defaultValues.trueSight,
@@ -58,6 +60,22 @@ class Token {
 
 		this.updateTerrain = true;
 		this.lastKnownPos = undefined;
+
+		if(borderColor === undefined) {
+			let [r, g, b] = convertToRGB(this.color.substring(1));
+			let [h, s, l] = rgbToHsl(r, g, b);
+			
+			if(l < 0.5) {
+				l += 0.25;
+			} else {
+				l -= 0.25;
+			}
+
+			[r, g, b] = hslToRgb(h, s, l);
+			this.borderColor = '#' + convertToHEX(r, g, b);
+		} else {
+			this.borderColor = borderColor;
+		}
 	}
 
 	update() {
@@ -120,6 +138,10 @@ class Token {
 	showSelf() {
 		ellipseMode(CENTER);
 		noStroke();
+		if(this.borderColor !== undefined) {
+			strokeWeight(1);
+			stroke(color(this.borderColor));
+		}
 		fill(color(this.color));
 		circle(this.x + this.size / 2, this.y + this.size / 2, this.size);
 	}

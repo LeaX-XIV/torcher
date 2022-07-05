@@ -56,6 +56,7 @@ function preload() {
         const col = "y" in t ? t['y'] : 0;
         const size = "size" in t ? t['size'] : "medium";
         const color = "color" in t ? t['color'] : "#0F53BA";
+        const borderColor = "borderColor" in t ? t['borderColor'] : undefined;
         const light = "light" in t ? t['light'] : [20, 20];
         const darkVision = "darkVision" in t ? t['darkVision'] : false;
         const trueSight = "trueSight" in t ? t['trueSight'] : false;
@@ -67,7 +68,7 @@ function preload() {
         const sizeFeet = Token.SIZES[size];
         const [x, y, w, h] = grid.xywhOfSquare(row, col);
 
-        const newToken = new Token(x + grid.x, y + grid.y, sizeFeet, color, new Light(light[0], light[1], sizeFeet / 2), darkVision, trueSight);
+        const newToken = new Token(x + grid.x, y + grid.y, sizeFeet, color, borderColor, new Light(light[0], light[1], sizeFeet / 2), darkVision, trueSight);
         tokens.push(newToken);
       }
     }
