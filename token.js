@@ -1,5 +1,6 @@
 class Token {
 	static RAYTRACE_POINTS = 50;
+	static RAYTRACE_STEPS = 20;
 
 	static PIXEL_PER_FEET = 50 / Grid.FEET_PER_SQUARE;
 
@@ -94,7 +95,7 @@ class Token {
 		imageMode(CENTER);
 		if(this.trueSight && trueSight) {
 			blendMode(LIGHTEST);
-			image(this.vision.vision, this.vision.x, this.vision.y, this.vision.vision.width, this.vision.vision.height);
+			image(this.vision.vision, this.vision.x + this.size / 2, this.vision.y + this.size / 2, this.vision.vision.width, this.vision.vision.height);
 			blendMode(BLEND);
 			return;
 		} else if(this.trueSight && !trueSight) {
@@ -109,9 +110,9 @@ class Token {
 			dimSight.mask(Token.DIM_MASK);
 			dimSight.filter(GRAY)
 		}
-		image(dimSight, this.vision.x, this.vision.y);
+		image(dimSight, this.vision.x + this.size / 2, this.vision.y + this.size / 2);
 		if(!this.darkVision) {
-			image(brightSight, this.vision.x, this.vision.y);
+			image(brightSight, this.vision.x + this.size / 2, this.vision.y + this.size / 2);
 		}
 		blendMode(BLEND);
 	}
@@ -120,7 +121,7 @@ class Token {
 		ellipseMode(CENTER);
 		noStroke();
 		fill(color(this.color));
-		circle(this.x, this.y, this.size);
+		circle(this.x + this.size / 2, this.y + this.size / 2, this.size);
 	}
 
 	move(dx, dy) {
@@ -133,7 +134,7 @@ class Token {
 	}
 
 	intersect(x, y) {
-		return dist(this.x, this.y, x, y) <= this.size / 2;
+		return dist(this.x + this.size / 2, this.y + this.size / 2, x, y) <= this.size / 2;
 	}
 
 	get brightLightRadius() { return feet2Pixel(this.light.bright, Token.PIXEL_PER_FEET) }
@@ -152,9 +153,10 @@ class Token {
 		Token.WALLS.loadPixels();
 		for(let t = 0; t <= TWO_PI; t += (TWO_PI / Token.RAYTRACE_POINTS)) {
 			let found = false;
-			for(let r = 0; r <= 1; r += 0.05) {
+			let increment = 1 / Token.RAYTRACE_STEPS
+			for(let r = 0; r <= 1; r += increment) {
 				let [relX, relY] = toCartesian(r * radius, t);
-				let index = toIndexInPixelArray(int(relX + this.x), int(relY + this.y));
+				let index = toIndexInPixelArray(int(relX + this.x + this.size / 2), int(relY + this.y + this.size / 2));
 				let red = Token.WALLS.pixels[index];
 				let g = Token.WALLS.pixels[index + 1];
 				let b = Token.WALLS.pixels[index + 2];
@@ -177,7 +179,7 @@ class Token {
 		gr.pop()
 
 		let rayImg = createImage(gr.width, gr.height)
-		rayImg.copy(Token.TERRAIN, this.x - radius, this.y - radius, gr.width, gr.height, 0, 0, gr.width, gr.height);
+		rayImg.copy(Token.TERRAIN, this.x + this.size / 2 - radius, this.y + this.size / 2 - radius, gr.width, gr.height, 0, 0, gr.width, gr.height);
 		rayImg.mask(Token.CIRCLE_MASK);
 
 		let rayMask = createImage(gr.width, gr.height);

@@ -60,14 +60,14 @@ function preload() {
         const darkVision = "darkVision" in t ? t['darkVision'] : false;
         const trueSight = "trueSight" in t ? t['trueSight'] : false;
 
-        // if(Token.SIZES[size] === undefined) {
-        if(size !== "medium") {
+        if(Token.SIZES[size] === undefined) {
+        // if(size !== "medium") {
           throw new TypeError(`Unexpected size '${size}'`);
         }
         const sizeFeet = Token.SIZES[size];
         const [x, y, w, h] = grid.xywhOfSquare(row, col);
 
-        const newToken = new Token(x + w / 2 + grid.x, y + h / 2 + grid.y, sizeFeet, color, new Light(light[0], light[1], sizeFeet / 2), darkVision, trueSight);
+        const newToken = new Token(x + grid.x, y + grid.y, sizeFeet, color, new Light(light[0], light[1], sizeFeet / 2), darkVision, trueSight);
         tokens.push(newToken);
       }
     }
@@ -93,7 +93,7 @@ function setup() {
   const [w, h] = getCanvasSize();
   createCanvas(w, h);
   background(backgroundColor);
-  frameRate(30)
+  frameRate(30);
 }
 
 function draw() {
@@ -146,7 +146,7 @@ function mouseReleased() {
   if(mouseButton === LEFT) {
     if(holding && grid.snapToGrid) {
       const [x, y, w, h] = grid.xywhOfSquareFromCoords(mouseX, mouseY);
-      holding.moveTo(x + w / 2 + grid.x, y + h / 2 + grid.y);
+      holding.moveTo(x + grid.x, y + grid.y);
     }
 
     // if(holding && obfuscateOnMovement) {
@@ -197,8 +197,8 @@ function showWalls() {
 }
 
 function getCanvasSize() {
-  const w = (grid.width <= 0 ? imgW : grid.width) - grid.x
-  const h = (grid.height <= 0 ? imgH : grid.height) - grid.y;
+  const w = (grid.width <= 0 ? imgW : grid.width);
+  const h = (grid.height <= 0 ? imgH : grid.height);
 
   return [w, h];
 }
