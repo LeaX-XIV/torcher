@@ -62,7 +62,7 @@ class Token {
 		this.lastKnownPos = undefined;
 
 		if(borderColor === undefined) {
-			let [r, g, b] = convertToRGB(this.color.substring(1));
+			let [r, g, b] = hexToRgb(this.color.substring(1));
 			let [h, s, l] = rgbToHsl(r, g, b);
 			if(l < 0.25) {
 				l += 0.25;
@@ -71,7 +71,7 @@ class Token {
 			}
 
 			[r, g, b] = hslToRgb(h, s, l);
-			this.borderColor = '#' + convertToHEX(r, g, b);
+			this.borderColor = '#' + rgbToHex(r, g, b);
 		} else {
 			this.borderColor = borderColor;
 		}

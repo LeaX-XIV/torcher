@@ -67,14 +67,14 @@ function hslToRgb(h, s, l){
 }
 
 /**
- * Converts an HEX color string to RGB.
+ * Converts an Hex color string to RGB.
  * Assumes str is 6 characters long matching [0-9A-Fa-f].
  * returns r, g, and b in the set [0, 255].
  *
  * @param   String  str     The hex string
  * @return  Array           The RGB representation
  */
-function convertToRGB(str){
+function hexToRgb(str){
     if(str.length != 6){
         throw "Only six-digit hex colors are allowed.";
     }
@@ -89,7 +89,7 @@ function convertToRGB(str){
 }
 
 /**
- * Converts a RGB color value in HEX color string.
+ * Converts a RGB color value in Hex color string.
  * Assumes r, g, and b in the set [0, 255].
  * Returns a 6 characters long string ('#' non included).
  *
@@ -98,7 +98,7 @@ function convertToRGB(str){
  * @param   Number  b       The blue color value
  * @return  String          The hex string representation
  */
-function convertToHEX(r, g, b){
+function rgbToHex(r, g, b){
 	r %= 255, g %= 255, b %= 255;
 
 	return parseInt(r.toFixed()).toString(16).padStart(2, '0')
