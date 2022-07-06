@@ -1,5 +1,6 @@
 class Token {
 	static RAYTRACE_POINTS = 50;
+	static RAYTRACE_STEPS = 20;
 
 	static PIXEL_PER_FEET = 50 / Grid.FEET_PER_SQUARE;
 
@@ -23,6 +24,8 @@ class Token {
 			y: 270,
 			size: 5,
 			color: '#0F53BA',
+			borderColor: undefined,
+			image: undefined,
 			light: new Light(20, 20),
 			darkVision: false,
 			trueSight: false,
@@ -33,19 +36,24 @@ class Token {
 
 	// size, light have values expressed in feet
 	constructor(
+		id,
 		x = Token.defaultValues.x,
 		y = Token.defaultValues.y,
 		size = Token.defaultValues.size,
 		color = Token.defaultValues.color,
+		borderColor = Token.defaultValues.borderColor,
+		image = Token.defaultValues.image,
 		light = new Light(Token.defaultValues.light.bright, Token.defaultValues.light.dim, Token.defaultValues.size / 2),
 		darkVision = Token.defaultValues.darkVision,
 		trueSight = Token.defaultValues.trueSight,
 		vision = undefined
 	) {
+		this.id = id;
 		this.x = x;
 		this.y = y;
 		this.size = feet2Pixel(size, Token.PIXEL_PER_FEET);
 		this.color = color;
+		this.image = image;
 		this.light = light;
 		// Make the light be cast from the edge of the token.
 		// this.light.bright += size / 2;
@@ -57,6 +65,21 @@ class Token {
 
 		this.updateTerrain = true;
 		this.lastKnownPos = undefined;
+
+		if(borderColor === undefined) {
+			let [r, g, b] = hexToRgb(this.color.substring(1));
+			let [h, s, l] = rgbToHsl(r, g, b);
+			if(l < 0.25) {
+				l += 0.25;
+			} else {
+				l -= 0.25;
+			}
+
+			[r, g, b] = hslToRgb(h, s, l);
+			this.borderColor = '#' + rgbToHex(r, g, b);
+		} else {
+			this.borderColor = borderColor;
+		}
 	}
 
 	update() {
@@ -94,7 +117,7 @@ class Token {
 		imageMode(CENTER);
 		if(this.trueSight && trueSight) {
 			blendMode(LIGHTEST);
-			image(this.vision.vision, this.vision.x, this.vision.y, this.vision.vision.width, this.vision.vision.height);
+			image(this.vision.vision, this.vision.x + this.size / 2, this.vision.y + this.size / 2, this.vision.vision.width, this.vision.vision.height);
 			blendMode(BLEND);
 			return;
 		} else if(this.trueSight && !trueSight) {
@@ -109,9 +132,9 @@ class Token {
 			dimSight.mask(Token.DIM_MASK);
 			dimSight.filter(GRAY)
 		}
-		image(dimSight, this.vision.x, this.vision.y);
+		image(dimSight, this.vision.x + this.size / 2, this.vision.y + this.size / 2);
 		if(!this.darkVision) {
-			image(brightSight, this.vision.x, this.vision.y);
+			image(brightSight, this.vision.x + this.size / 2, this.vision.y + this.size / 2);
 		}
 		blendMode(BLEND);
 	}
@@ -119,8 +142,19 @@ class Token {
 	showSelf() {
 		ellipseMode(CENTER);
 		noStroke();
+		if(this.borderColor !== undefined) {
+			strokeWeight(1);
+			stroke(color(this.borderColor));
+		}
 		fill(color(this.color));
-		circle(this.x, this.y, this.size);
+		circle(this.x + this.size / 2, this.y + this.size / 2, this.size);
+		if(this.image) {
+			imageMode(CENTER);
+			image(this.image, this.x + this.size / 2, this.y + this.size / 2, this.size * 0.9, this.size * 0.9);
+			// rectMode(CENTER);
+			// noFill();
+			// rect(this.x + this.size / 2, this.y + this.size / 2, this.size * 0.9, this.size * 0.9);
+		}
 	}
 
 	move(dx, dy) {
@@ -133,7 +167,7 @@ class Token {
 	}
 
 	intersect(x, y) {
-		return dist(this.x, this.y, x, y) <= this.size / 2;
+		return dist(this.x + this.size / 2, this.y + this.size / 2, x, y) <= this.size / 2;
 	}
 
 	get brightLightRadius() { return feet2Pixel(this.light.bright, Token.PIXEL_PER_FEET) }
@@ -152,9 +186,10 @@ class Token {
 		Token.WALLS.loadPixels();
 		for(let t = 0; t <= TWO_PI; t += (TWO_PI / Token.RAYTRACE_POINTS)) {
 			let found = false;
-			for(let r = 0; r <= 1; r += 0.05) {
+			let increment = 1 / Token.RAYTRACE_STEPS
+			for(let r = 0; r <= 1; r += increment) {
 				let [relX, relY] = toCartesian(r * radius, t);
-				let index = toIndexInPixelArray(int(relX + this.x), int(relY + this.y));
+				let index = toIndexInPixelArray(int(relX + this.x + this.size / 2), int(relY + this.y + this.size / 2));
 				let red = Token.WALLS.pixels[index];
 				let g = Token.WALLS.pixels[index + 1];
 				let b = Token.WALLS.pixels[index + 2];
@@ -177,7 +212,7 @@ class Token {
 		gr.pop()
 
 		let rayImg = createImage(gr.width, gr.height)
-		rayImg.copy(Token.TERRAIN, this.x - radius, this.y - radius, gr.width, gr.height, 0, 0, gr.width, gr.height);
+		rayImg.copy(Token.TERRAIN, this.x + this.size / 2 - radius, this.y + this.size / 2 - radius, gr.width, gr.height, 0, 0, gr.width, gr.height);
 		rayImg.mask(Token.CIRCLE_MASK);
 
 		let rayMask = createImage(gr.width, gr.height);
