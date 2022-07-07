@@ -16,6 +16,10 @@ let obfuscateOnMovement = true;
 
 let tokensData = [];
 let tokens = [];
+
+let obstaclesData = [];
+let obstacles = [];
+
 let holding = undefined;
 
 let grid = undefined;
@@ -33,6 +37,11 @@ function preload() {
       map_walls = img;
       Token.WALLS = map_walls;
     });
+
+    backgroundColor = settings['background_color'];
+    if("obfuscate_on_movement" in settings) {
+      obfuscateOnMovement = settings["obfuscate_on_movement"];
+    }
 
     if("grid" in settings) {
       let grid_x = settings['grid']['x'];
@@ -80,10 +89,18 @@ function preload() {
       }
     }
 
-    backgroundColor = settings['background_color'];
+    if("obstacles" in settings) {
+      for(const i in settings['obstacles']) {
+        const o = settings['obstacles'][i];
 
-    if("obfuscate_on_movement" in settings) {
-      obfuscateOnMovement = settings["obfuscate_on_movement"];
+        obstaclesData[i] = {};
+        obstaclesData[i].id = i;
+        obstaclesData[i].x = "x" in o ? o['x'] : new EvalError("Incorrect format of obstacle. Missing 'x' field.");
+        obstaclesData[i].y = "y" in o ? o['y'] : new EvalError("Incorrect format of obstacle. Missing 'y' field.");
+        obstaclesData[i].w = "w" in o ? o['w'] : new EvalError("Incorrect format of obstacle. Missing 'w' field.");
+        obstaclesData[i].h = "h" in o ? o['h'] : new EvalError("Incorrect format of obstacle. Missing 'h' field.");
+        obstaclesData[i].color = "color" in o ? o['color'] : backgroundColor;
+      }
     }
   });
 
@@ -101,6 +118,11 @@ function setup() {
   for(const td of tokensData) {
     const newToken = new Token(td.i, td.x + grid.x, td.y + grid.y, td.sizeFeet, td.color, td.borderColor, td.image, new Light(td.light[0], td.light[1], td.sizeFeet / 2), td.darkVision, td.trueSight);
     tokens.push(newToken);
+  }
+
+  for(const od of obstaclesData) {
+    const newObstacle = new Obstacle(od.id, od.x, od.y, od.w, od.h, od.color);
+    obstacles.push(newObstacle);
   }
 
   const [w, h] = getCanvasSize();
@@ -123,6 +145,8 @@ function draw() {
 
   showWalls();
 
+  showObstacles();
+
   showTokens();
 
   grid.show();
@@ -134,6 +158,7 @@ function draw() {
 
 function mousePressed() {
   if(mouseButton === LEFT) {
+    console.log(mouseX + grid.x, mouseY + grid.y);
     for(let i = tokens.length - 1; i >= 0; --i) {
       const tk = tokens[i];
       if(tk.intersect(mouseX + grid.x, mouseY + grid.y)) {
@@ -208,6 +233,12 @@ function showTokens() {
 function showWalls() {
   imageMode(CORNER)
   image(map_walls, 0, 0);
+}
+
+function showObstacles() {
+  for(const o of obstacles) {
+    o.show();
+  }
 }
 
 function getCanvasSize() {
