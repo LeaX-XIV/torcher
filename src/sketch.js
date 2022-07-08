@@ -16,11 +16,11 @@ let obfuscateOnMovement = true;
 
 let tokensData = [];
 let tokens = [];
+let holding = undefined;
 
 let obstaclesData = [];
 let obstacles = [];
-
-let holding = undefined;
+let selected = undefined;
 
 let grid = undefined;
 
@@ -132,6 +132,7 @@ function setup() {
 }
 
 function draw() {
+  push();
   translate(-grid.x, -grid.y);
 
   clear();
@@ -154,22 +155,55 @@ function draw() {
   if(!mouseIsPressed) {
     noLoop()
   }
+  pop();
 }
 
 function mousePressed() {
   if(mouseButton === LEFT) {
     console.log(mouseX + grid.x, mouseY + grid.y);
+    // Check tokens intersection
     for(let i = tokens.length - 1; i >= 0; --i) {
       const tk = tokens[i];
       if(tk.intersect(mouseX + grid.x, mouseY + grid.y)) {
         holding = tk;
         holding.recordLastKnownLocation();
         if(obfuscateOnMovement) {
-          holding.pickUp()
+          holding.pickUp();
         }
-        loop()
+        if(selected) {
+          console.log(`unselecting ${selected.id}`);
+          selected.unselect();
+          selected = undefined;
+        }
+        loop();
+        // break;
         break;
       }
+    }
+    // Check obstacles intersection
+    for(let i = obstacles.length - 1; i >= 0; --i) {
+      const o = obstacles[i];
+      if(o.intersect(mouseX + grid.x, mouseY + grid.y)) {
+        if(!holding && !selected) {
+          o.select();
+          selected = o;
+          draw();
+          console.log(`selected ${selected.id}`);
+          return;
+        }
+      }
+    }
+
+    if(!holding && selected && selected.intersect(mouseX + grid.x, mouseY + grid.y)) {
+      console.log(`unshowing ${selected.id}`);
+      selected.doUnshow();
+      selected.unselect();
+      selected = undefined;
+      // call update on all tokens
+      for (const tk of tokens) {
+        tk.update(true);
+      }
+      draw();
     }
   }
 }
@@ -191,6 +225,14 @@ function mouseReleased() {
     // if(holding && obfuscateOnMovement) {
     if(holding) {
       holding.putDown();
+    }
+    
+    if(!holding && selected && !selected.intersect(mouseX + grid.x, mouseY + grid.y)) {
+      console.log(`unselecting ${selected.id}`);
+      selected.unselect();
+      selected = undefined;
+      draw();
+    
     }
     holding = undefined;
     noLoop()
