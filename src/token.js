@@ -1,5 +1,5 @@
 class Token {
-	static RAYTRACE_POINTS = 50;
+	static RAYTRACE_POINTS = 360;
 	static RAYTRACE_STEPS = 20;
 
 	static PIXEL_PER_FEET = 50 / Grid.FEET_PER_SQUARE;
@@ -82,8 +82,8 @@ class Token {
 		}
 	}
 
-	update() {
-		if(this.updateTerrain && (this.x !== this.vision.x || this.y !== this.vision.y)) {
+	update(force = false) {
+		if(force || (this.updateTerrain && (this.x !== this.vision.x || this.y !== this.vision.y))) {
 			// Recreate vision
 			let terrainVision = this.#generateTerrainView(feet2Pixel(this.light.totalRadius, Token.PIXEL_PER_FEET));
 
@@ -183,17 +183,25 @@ class Token {
 		gr.fill('rgba(0, 0, 0, 1)');
 
 		gr.beginShape();
-		Token.WALLS.loadPixels();
+		
+		let wallsAndObstacles = createGraphics(Token.WALLS.width, Token.WALLS.height);
+		wallsAndObstacles.copy(Token.WALLS, 0, 0, Token.WALLS.width, Token.WALLS.height, 0, 0, Token.WALLS.width, Token.WALLS.height);
+		for(const o of obstacles) {
+			o.show(wallsAndObstacles);
+		}
+		// Token.WALLS.loadPixels();
+		wallsAndObstacles.loadPixels();
+
 		for(let t = 0; t <= TWO_PI; t += (TWO_PI / Token.RAYTRACE_POINTS)) {
 			let found = false;
 			let increment = 1 / Token.RAYTRACE_STEPS
 			for(let r = 0; r <= 1; r += increment) {
 				let [relX, relY] = toCartesian(r * radius, t);
 				let index = toIndexInPixelArray(int(relX + this.x + this.size / 2), int(relY + this.y + this.size / 2));
-				let red = Token.WALLS.pixels[index];
-				let g = Token.WALLS.pixels[index + 1];
-				let b = Token.WALLS.pixels[index + 2];
-				let a = Token.WALLS.pixels[index + 3];
+				let red = wallsAndObstacles.pixels[index];
+				let g =   wallsAndObstacles.pixels[index + 1];
+				let b =   wallsAndObstacles.pixels[index + 2];
+				let a =   wallsAndObstacles.pixels[index + 3];
 				if(red === undefined || g === undefined || b === undefined || a === undefined) {
 					break;
 				}

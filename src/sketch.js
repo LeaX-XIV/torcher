@@ -18,7 +18,13 @@ let tokensData = [];
 let tokens = [];
 let holding = undefined;
 
+let obstaclesData = [];
+let obstacles = [];
+let selected = undefined;
+
 let grid = undefined;
+
+let ctx;
 
 function preload() {
   grid = new Grid();
@@ -33,6 +39,11 @@ function preload() {
       map_walls = img;
       Token.WALLS = map_walls;
     });
+
+    backgroundColor = settings['background_color'];
+    if("obfuscate_on_movement" in settings) {
+      obfuscateOnMovement = settings["obfuscate_on_movement"];
+    }
 
     if("grid" in settings) {
       let grid_x = settings['grid']['x'];
@@ -80,10 +91,19 @@ function preload() {
       }
     }
 
-    backgroundColor = settings['background_color'];
+    if("obstacles" in settings) {
+      for(const i in settings['obstacles']) {
+        const o = settings['obstacles'][i];
 
-    if("obfuscate_on_movement" in settings) {
-      obfuscateOnMovement = settings["obfuscate_on_movement"];
+        obstaclesData[i] = {};
+        obstaclesData[i].id = i;
+        obstaclesData[i].x = o['x'];
+        obstaclesData[i].y = o['y'];
+        obstaclesData[i].w = o['w'];
+        obstaclesData[i].h = o['h'];
+        obstaclesData[i].color = "color" in o ? o['color'] : backgroundColor;
+        obstaclesData[i].borderColor = "borderColor" in o ? o['borderColor'] : undefined;
+      }
     }
   });
 
@@ -103,13 +123,19 @@ function setup() {
     tokens.push(newToken);
   }
 
+  for(const od of obstaclesData) {
+    const newObstacle = new Obstacle(od.id, od.x, od.y, od.w, od.h, od.color, od.borderColor);
+    obstacles.push(newObstacle);
+  }
+
   const [w, h] = getCanvasSize();
-  createCanvas(w, h);
+  ctx = createCanvas(w, h)._pInst;
   background(backgroundColor);
   frameRate(30);
 }
 
 function draw() {
+  push();
   translate(-grid.x, -grid.y);
 
   clear();
@@ -123,6 +149,8 @@ function draw() {
 
   showWalls();
 
+  showObstacles();
+
   showTokens();
 
   grid.show();
@@ -130,21 +158,53 @@ function draw() {
   if(!mouseIsPressed) {
     noLoop()
   }
+  pop();
 }
 
 function mousePressed() {
   if(mouseButton === LEFT) {
+    console.log(mouseX + grid.x, mouseY + grid.y);
+    // Check tokens intersection
     for(let i = tokens.length - 1; i >= 0; --i) {
       const tk = tokens[i];
       if(tk.intersect(mouseX + grid.x, mouseY + grid.y)) {
         holding = tk;
         holding.recordLastKnownLocation();
         if(obfuscateOnMovement) {
-          holding.pickUp()
+          holding.pickUp();
         }
-        loop()
+        if(selected) {
+          console.log(`unselecting ${selected.id}`);
+          selected.unselect();
+          selected = undefined;
+        }
+        loop();
+        // break;
         break;
       }
+    }
+    // Check obstacles intersection
+    for(let i = obstacles.length - 1; i >= 0; --i) {
+      const o = obstacles[i];
+      if(o.isShowing() && o.intersect(mouseX + grid.x, mouseY + grid.y)) {
+        if(!holding && !selected) {
+          o.select();
+          selected = o;
+          redraw();
+          return;
+        }
+      }
+    }
+
+    if(!holding && selected && selected.intersect(mouseX + grid.x, mouseY + grid.y)) {
+      selected.doUnshow();
+      selected.unselect();
+      selected = undefined;
+      // call update on all tokens
+      for (const tk of tokens) {
+        tk.update(true);
+      }
+      redraw();
     }
   }
 }
@@ -166,6 +226,13 @@ function mouseReleased() {
     // if(holding && obfuscateOnMovement) {
     if(holding) {
       holding.putDown();
+    }
+    
+    if(!holding && selected && !selected.intersect(mouseX + grid.x, mouseY + grid.y)) {
+      selected.unselect();
+      selected = undefined;
+      redraw();
+    
     }
     holding = undefined;
     noLoop()
@@ -208,6 +275,12 @@ function showTokens() {
 function showWalls() {
   imageMode(CORNER)
   image(map_walls, 0, 0);
+}
+
+function showObstacles() {
+  for(const o of obstacles) {
+    o.show();
+  }
 }
 
 function getCanvasSize() {

@@ -31,5 +31,15 @@
 			"color": "#ab57fd",
 			"light": [0, 30]
 		}
+	],
+	"obstacles": [
+		{
+			"x": 300,
+			"y": 720,
+			"w": 30,
+			"h": 30,
+			"color": "#badf000d",
+			"borderColor": "#f00dbaad"
+		}
 	]
 }
