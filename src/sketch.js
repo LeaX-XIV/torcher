@@ -24,6 +24,8 @@ let selected = undefined;
 
 let grid = undefined;
 
+let ctx;
+
 function preload() {
   grid = new Grid();
   loadJSON(SETTINGS_FILENAME, settings => {

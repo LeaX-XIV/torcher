@@ -28,30 +28,21 @@ class Obstacle {
 		this.showing = showing;
 	}
 
-	show(graphics) {
+	show(graphics = ctx) {
 		if(!this.isShowing()) {
 			return;
 		}
 
-		if(graphics == undefined) {
-			push();
-			rectMode(CORNER);
-			noStroke();
-			if(this.isSelected()) {
-				stroke(this.borderColor);
-				strokeWeight(5);
-			}
-			fill(color(this.color));
-			rect(this.x, this.y, this.w, this.h);
-			pop();
-		} else {
-			graphics.push();
-			graphics.rectMode(CORNER);
-			graphics.noStroke();
-			graphics.fill(color(this.color));
-			graphics.rect(this.x, this.y, this.w, this.h);
-			graphics.pop();
+		graphics.push();
+		graphics.rectMode(CORNER);
+		graphics.noStroke();
+		if(graphics === ctx && this.isSelected()) {
+			graphics.stroke(this.borderColor);
+			graphics.strokeWeight(5);
 		}
+		graphics.fill(color(this.color));
+		graphics.rect(this.x, this.y, this.w, this.h);
+		graphics.pop();
 	}
 
 	isSelected() {
