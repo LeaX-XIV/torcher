@@ -95,11 +95,12 @@ function preload() {
 
         obstaclesData[i] = {};
         obstaclesData[i].id = i;
-        obstaclesData[i].x = "x" in o ? o['x'] : new EvalError("Incorrect format of obstacle. Missing 'x' field.");
-        obstaclesData[i].y = "y" in o ? o['y'] : new EvalError("Incorrect format of obstacle. Missing 'y' field.");
-        obstaclesData[i].w = "w" in o ? o['w'] : new EvalError("Incorrect format of obstacle. Missing 'w' field.");
-        obstaclesData[i].h = "h" in o ? o['h'] : new EvalError("Incorrect format of obstacle. Missing 'h' field.");
+        obstaclesData[i].x = o['x'];
+        obstaclesData[i].y = o['y'];
+        obstaclesData[i].w = o['w'];
+        obstaclesData[i].h = o['h'];
         obstaclesData[i].color = "color" in o ? o['color'] : backgroundColor;
+        obstaclesData[i].borderColor = "borderColor" in o ? o['borderColor'] : undefined;
       }
     }
   });
@@ -121,12 +122,12 @@ function setup() {
   }
 
   for(const od of obstaclesData) {
-    const newObstacle = new Obstacle(od.id, od.x, od.y, od.w, od.h, od.color);
+    const newObstacle = new Obstacle(od.id, od.x, od.y, od.w, od.h, od.color, od.borderColor);
     obstacles.push(newObstacle);
   }
 
   const [w, h] = getCanvasSize();
-  createCanvas(w, h);
+  ctx = createCanvas(w, h)._pInst;
   background(backgroundColor);
   frameRate(30);
 }
@@ -183,19 +184,17 @@ function mousePressed() {
     // Check obstacles intersection
     for(let i = obstacles.length - 1; i >= 0; --i) {
       const o = obstacles[i];
-      if(o.intersect(mouseX + grid.x, mouseY + grid.y)) {
+      if(o.isShowing() && o.intersect(mouseX + grid.x, mouseY + grid.y)) {
         if(!holding && !selected) {
           o.select();
           selected = o;
-          draw();
-          console.log(`selected ${selected.id}`);
+          redraw();
           return;
         }
       }
     }
 
     if(!holding && selected && selected.intersect(mouseX + grid.x, mouseY + grid.y)) {
-      console.log(`unshowing ${selected.id}`);
       selected.doUnshow();
       selected.unselect();
       selected = undefined;
@@ -203,7 +202,7 @@ function mousePressed() {
       for (const tk of tokens) {
         tk.update(true);
       }
-      draw();
+      redraw();
     }
   }
 }
@@ -228,10 +227,9 @@ function mouseReleased() {
     }
     
     if(!holding && selected && !selected.intersect(mouseX + grid.x, mouseY + grid.y)) {
-      console.log(`unselecting ${selected.id}`);
       selected.unselect();
       selected = undefined;
-      draw();
+      redraw();
     
     }
     holding = undefined;

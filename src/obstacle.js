@@ -1,11 +1,21 @@
 class Obstacle {
+	static get defaultValues() {
+		return {
+			color: '#000',
+			borderColor: '#F7F73DAA',
+			selected: false,
+			showing: true,
+		};
+	}
+
 	constructor(
 		id,
 		x, y,
 		w, h,
-		color = '#000',
-		selected = false,
-		showing = true
+		color = Obstacle.defaultValues.color,
+		borderColor = Obstacle.defaultValues.borderColor,
+		selected = Obstacle.defaultValues.selected,
+		showing = Obstacle.defaultValues.showing
 	) {
 		this.id = id;
 		this.x = x;
@@ -13,6 +23,7 @@ class Obstacle {
 		this.w = w;
 		this.h = h;
 		this.color = color;
+		this.borderColor = borderColor;
 		this.selected = selected;
 		this.showing = showing;
 	}
@@ -27,8 +38,8 @@ class Obstacle {
 			rectMode(CORNER);
 			noStroke();
 			if(this.isSelected()) {
-				stroke('#0aa0a0');
-				strokeWeight(10);
+				stroke(this.borderColor);
+				strokeWeight(5);
 			}
 			fill(color(this.color));
 			rect(this.x, this.y, this.w, this.h);
