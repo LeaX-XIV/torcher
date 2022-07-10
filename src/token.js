@@ -36,6 +36,7 @@ class Token {
 
 	// size, light have values expressed in feet
 	constructor(
+		ctx = undefined,
 		id,
 		x = Token.defaultValues.x,
 		y = Token.defaultValues.y,
@@ -46,7 +47,7 @@ class Token {
 		light = new Light(Token.defaultValues.light.bright, Token.defaultValues.light.dim, Token.defaultValues.size / 2),
 		darkVision = Token.defaultValues.darkVision,
 		trueSight = Token.defaultValues.trueSight,
-		vision = undefined
+		vision = undefined,
 	) {
 		this.id = id;
 		this.x = x;
@@ -61,7 +62,8 @@ class Token {
 
 		this.darkVision = darkVision;
 		this.trueSight = trueSight;
-		this.vision = vision || new Vision(-1, -1, createGraphics(feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET), feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET)));
+		this.ctx = ctx;
+		this.vision = vision || new Vision(-1, -1, this.ctx.createGraphics(feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET), feet2Pixel(this.light.totalRadius * 2, Token.PIXEL_PER_FEET)));
 
 		this.updateTerrain = true;
 		this.lastKnownPos = undefined;
@@ -87,7 +89,7 @@ class Token {
 			// Recreate vision
 			let terrainVision = this.#generateTerrainView(feet2Pixel(this.light.totalRadius, Token.PIXEL_PER_FEET));
 
-			this.vision.vision.imageMode(CENTER);
+			this.vision.vision.imageMode(this.vision.vision.CENTER);
 			this.vision.vision.image(terrainVision, this.vision.vision.width / 2, this.vision.vision.height / 2);
 
 			this.vision.x = this.x;
@@ -113,44 +115,44 @@ class Token {
 		this.lastKnownPos = undefined;
 	}
 
-	showTerrain(trueSight) {
-		imageMode(CENTER);
+	showTerrain(ctx = this.ctx, trueSight) {
+		ctx.imageMode(ctx.CENTER);
 		if(this.trueSight && trueSight) {
-			blendMode(LIGHTEST);
-			image(this.vision.vision, this.vision.x + this.size / 2, this.vision.y + this.size / 2, this.vision.vision.width, this.vision.vision.height);
-			blendMode(BLEND);
+			ctx.blendMode(ctx.LIGHTEST);
+			ctx.image(this.vision.vision, this.vision.x + this.size / 2, this.vision.y + this.size / 2, this.vision.vision.width, this.vision.vision.height);
+			ctx.blendMode(ctx.BLEND);
 			return;
 		} else if(this.trueSight && !trueSight) {
 			return;
 		}
 
-		blendMode(LIGHTEST);
+		ctx.blendMode(ctx.LIGHTEST);
 		let brightSight = undefined;
 		let dimSight = this.#obtainTerrainViewByCut(feet2Pixel(this.light.dimRadius, Token.PIXEL_PER_FEET));
 		if(!this.darkVision) {
 			brightSight = this.#obtainTerrainViewByCut(feet2Pixel(this.light.brightRadius, Token.PIXEL_PER_FEET));
 			dimSight.mask(Token.DIM_MASK);
-			dimSight.filter(GRAY)
+			dimSight.filter(ctx.GRAY)
 		}
-		image(dimSight, this.vision.x + this.size / 2, this.vision.y + this.size / 2);
+		ctx.image(dimSight, this.vision.x + this.size / 2, this.vision.y + this.size / 2);
 		if(!this.darkVision) {
-			image(brightSight, this.vision.x + this.size / 2, this.vision.y + this.size / 2);
+			ctx.image(brightSight, this.vision.x + this.size / 2, this.vision.y + this.size / 2);
 		}
-		blendMode(BLEND);
+		ctx.blendMode(ctx.BLEND);
 	}
 
-	showSelf() {
-		ellipseMode(CENTER);
-		noStroke();
+	showSelf(ctx = this.ctx) {
+		ctx.ellipseMode(ctx.CENTER);
+		ctx.noStroke();
 		if(this.borderColor !== undefined) {
-			strokeWeight(1);
-			stroke(color(this.borderColor));
+			ctx.strokeWeight(1);
+			ctx.stroke(ctx.color(this.borderColor));
 		}
-		fill(color(this.color));
-		circle(this.x + this.size / 2, this.y + this.size / 2, this.size);
+		ctx.fill(ctx.color(this.color));
+		ctx.circle(this.x + this.size / 2, this.y + this.size / 2, this.size);
 		if(this.image) {
-			imageMode(CENTER);
-			image(this.image, this.x + this.size / 2, this.y + this.size / 2, this.size * 0.9, this.size * 0.9);
+			ctx.imageMode(ctx.CENTER);
+			ctx.image(this.image, this.x + this.size / 2, this.y + this.size / 2, this.size * 0.9, this.size * 0.9);
 			// rectMode(CENTER);
 			// noFill();
 			// rect(this.x + this.size / 2, this.y + this.size / 2, this.size * 0.9, this.size * 0.9);
@@ -178,13 +180,13 @@ class Token {
 
 		gr.clear();
 		gr.push();
-		imageMode(CORNER)
+		gr.imageMode(gr.CORNER)
 		gr.translate(radius, radius);
 		gr.fill('rgba(0, 0, 0, 1)');
 
 		gr.beginShape();
 		
-		let wallsAndObstacles = createGraphics(Token.WALLS.width, Token.WALLS.height);
+		let wallsAndObstacles = this.ctx.createGraphics(Token.WALLS.width, Token.WALLS.height);
 		wallsAndObstacles.copy(Token.WALLS, 0, 0, Token.WALLS.width, Token.WALLS.height, 0, 0, Token.WALLS.width, Token.WALLS.height);
 		for(const o of obstacles) {
 			o.show(wallsAndObstacles);
@@ -192,12 +194,12 @@ class Token {
 		// Token.WALLS.loadPixels();
 		wallsAndObstacles.loadPixels();
 
-		for(let t = 0; t <= TWO_PI; t += (TWO_PI / Token.RAYTRACE_POINTS)) {
+		for(let t = 0; t <= this.ctx.TWO_PI; t += (this.ctx.TWO_PI / Token.RAYTRACE_POINTS)) {
 			let found = false;
 			let increment = 1 / Token.RAYTRACE_STEPS
 			for(let r = 0; r <= 1; r += increment) {
 				let [relX, relY] = toCartesian(r * radius, t);
-				let index = toIndexInPixelArray(int(relX + this.x + this.size / 2), int(relY + this.y + this.size / 2));
+				let index = toIndexInPixelArray(this.ctx, this.ctx.int(relX + this.x + this.size / 2), this.ctx.int(relY + this.y + this.size / 2));
 				let red = wallsAndObstacles.pixels[index];
 				let g =   wallsAndObstacles.pixels[index + 1];
 				let b =   wallsAndObstacles.pixels[index + 2];
@@ -216,14 +218,14 @@ class Token {
 				gr.vertex(relX, relY);
 			}
 		}
-		gr.endShape(CLOSE);
+		gr.endShape(gr.CLOSE);
 		gr.pop()
 
-		let rayImg = createImage(gr.width, gr.height)
+		let rayImg = gr.createImage(gr.width, gr.height)
 		rayImg.copy(Token.TERRAIN, this.x + this.size / 2 - radius, this.y + this.size / 2 - radius, gr.width, gr.height, 0, 0, gr.width, gr.height);
 		rayImg.mask(Token.CIRCLE_MASK);
 
-		let rayMask = createImage(gr.width, gr.height);
+		let rayMask = gr.createImage(gr.width, gr.height);
 		rayMask.copy(gr, 0, 0, gr.width, gr.height, 0, 0, gr.width, gr.height);
 		rayImg.mask(rayMask);
 
@@ -234,7 +236,7 @@ class Token {
 		let gr = this.vision.vision;
 
 		// if(radius < gr.width) {
-		let rayImg = createImage(radius * 2, radius * 2);
+		let rayImg = this.ctx.createImage(radius * 2, radius * 2);
 		rayImg.copy(gr, gr.width / 2 - radius, gr.height / 2 - radius, radius * 2, radius * 2, 0, 0, radius * 2, radius * 2);
 		rayImg.mask(Token.CIRCLE_MASK);
 
@@ -265,8 +267,8 @@ class Vision {
 
 const feet2Pixel = (feet, pixelPerFeet) => pixelPerFeet * feet;
 
-const toPolar = (x, y) => [sqrt(x * x + y * y), atan2(y / x)];
+const toPolar = (x, y) => [Math.sqrt(x * x + y * y), Math.atan2(y / x)];
 
-const toCartesian = (r, t) => [r * cos(t), r * sin(t)];
+const toCartesian = (r, t) => [r * Math.cos(t), r * Math.sin(t)];
 
-const toIndexInPixelArray = (x, y, w = imgW) => int((y * w + x) * pixelDensity() * 4);
+const toIndexInPixelArray = (ctx, x, y, w = imgW) => ctx.int((y * w + x) * ctx.pixelDensity() * 4);

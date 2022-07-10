@@ -105,3 +105,7 @@ function rgbToHex(r, g, b){
 		 + parseInt(g.toFixed()).toString(16).padStart(2, '0')
 		 + parseInt(b.toFixed()).toString(16).padStart(2, '0');
 }
+
+function dist(x1, y1, x2, y2) {
+    return Math.sqrt( (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+}

@@ -9,13 +9,14 @@ class Obstacle {
 	}
 
 	constructor(
+		ctx = undefined,
 		id,
 		x, y,
 		w, h,
 		color = Obstacle.defaultValues.color,
 		borderColor = Obstacle.defaultValues.borderColor,
 		selected = Obstacle.defaultValues.selected,
-		showing = Obstacle.defaultValues.showing
+		showing = Obstacle.defaultValues.showing,
 	) {
 		this.id = id;
 		this.x = x;
@@ -26,23 +27,24 @@ class Obstacle {
 		this.borderColor = borderColor;
 		this.selected = selected;
 		this.showing = showing;
+		this.ctx = ctx;
 	}
 
-	show(graphics = ctx) {
+	show(ctx = this.ctx) {
 		if(!this.isShowing()) {
 			return;
 		}
 
-		graphics.push();
-		graphics.rectMode(CORNER);
-		graphics.noStroke();
-		if(graphics === ctx && this.isSelected()) {
-			graphics.stroke(this.borderColor);
-			graphics.strokeWeight(5);
+		ctx.push();
+		ctx.rectMode(ctx.CORNER);
+		ctx.noStroke();
+		if(ctx === this.ctx && this.isSelected()) {
+			ctx.stroke(this.borderColor);
+			ctx.strokeWeight(5);
 		}
-		graphics.fill(color(this.color));
-		graphics.rect(this.x, this.y, this.w, this.h);
-		graphics.pop();
+		ctx.fill(ctx.color(this.color));
+		ctx.rect(this.x, this.y, this.w, this.h);
+		ctx.pop();
 	}
 
 	isSelected() {
